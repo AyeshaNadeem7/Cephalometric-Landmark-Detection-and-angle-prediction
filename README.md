@@ -10,3 +10,4 @@ Project Objectives
 
 •	Enable model persistence through save/load of trained weights.
 
+<img width="1500" height="744" alt="image" src="https://github.com/user-attachments/assets/e1344cc5-6e2c-43f1-a06a-9e0e8049e2e7" />
