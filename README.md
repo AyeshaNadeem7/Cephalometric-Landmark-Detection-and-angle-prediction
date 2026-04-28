@@ -37,6 +37,23 @@ This repo does **not** include a trained weights file by default.
 - `config.py`
 - `model.pth`
 
+### Deploying from GitHub (recommended)
+
+If you connect this repo to a Space, Hugging Face will pull code from GitHub automatically.
+
+Important: `model.pth` is ignored by `.gitignore` (so it won't be in GitHub by default). You have 2 options:
+
+**Option A (simple):** Track `model.pth` with Git LFS and commit it to GitHub.
+
+**Option B (recommended):** Upload `model.pth` to a **Hugging Face *Model* repo** and let the Space download it at startup.
+
+To use Option B:
+1) Create a model repo on Hugging Face (e.g. `username/ceph-landmark-model`)
+2) Upload `model.pth` to that model repo
+3) In your Space settings, set the env var:
+- `HF_MODEL_REPO = username/ceph-landmark-model`
+	(optional) `HF_MODEL_FILENAME = model.pth`
+
 5) After the Space builds, you will get a public URL like:
 - `https://<username>-<space-name>.hf.space`
 

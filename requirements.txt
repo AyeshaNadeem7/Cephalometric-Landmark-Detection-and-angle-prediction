@@ -3,3 +3,4 @@ torch
 torchvision
 numpy
 Pillow
+huggingface_hub>=0.20

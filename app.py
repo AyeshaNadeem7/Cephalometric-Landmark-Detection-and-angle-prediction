@@ -71,6 +71,46 @@ def _strip_module_prefix(state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch
     return {k[len("module.") :]: v for k, v in state_dict.items()}
 
 
+def _resolve_weights_path() -> str:
+    """Return a local path to model weights.
+
+    Priority:
+    1) Local file named MODEL_FILENAME (default: model.pth)
+    2) Download from HF Hub if HF_MODEL_REPO is set
+
+    Env vars (optional):
+    - HF_MODEL_REPO: e.g. "username/my-ceph-model" (a HF *model* repo)
+    - HF_MODEL_FILENAME: defaults to MODEL_FILENAME
+    - HF_MODEL_REVISION: optional branch/tag/commit
+    - HF_TOKEN / HUGGINGFACE_HUB_TOKEN: if the model repo is private
+    """
+
+    if os.path.exists(MODEL_FILENAME):
+        return MODEL_FILENAME
+
+    repo_id = os.environ.get("HF_MODEL_REPO")
+    if not repo_id:
+        return MODEL_FILENAME
+
+    filename = os.environ.get("HF_MODEL_FILENAME", MODEL_FILENAME)
+    revision = os.environ.get("HF_MODEL_REVISION")
+
+    try:
+        from huggingface_hub import hf_hub_download
+    except Exception as e:
+        raise RuntimeError(
+            "huggingface_hub is required to download weights from the Hub. "
+            "Add it to requirements.txt or upload model.pth into the Space repo."
+        ) from e
+
+    return hf_hub_download(
+        repo_id=repo_id,
+        filename=filename,
+        repo_type="model",
+        revision=revision,
+    )
+
+
 def _load_model() -> LandmarkModel:
     global _model
     if _model is not None:
@@ -78,14 +118,15 @@ def _load_model() -> LandmarkModel:
 
     model = LandmarkModel(NUM_LANDMARKS)
 
-    if not os.path.exists(MODEL_FILENAME):
+    weights_path = _resolve_weights_path()
+    if not os.path.exists(weights_path):
         raise FileNotFoundError(
-            f"Missing model weights: '{MODEL_FILENAME}'. "
-            "Upload your trained weights into the Space repo (same folder as app.py), "
-            "or set MODEL_FILENAME env var to the correct filename."
+            f"Missing model weights. Tried '{MODEL_FILENAME}' (local) and also checked "
+            "HF_MODEL_REPO (if set). Upload weights to the Space, or set HF_MODEL_REPO "
+            "to download them from the Hugging Face Hub."
         )
 
-    raw = torch.load(MODEL_FILENAME, map_location="cpu")
+    raw = torch.load(weights_path, map_location="cpu")
     state = _strip_module_prefix(_extract_state_dict(raw))
     model.load_state_dict(state, strict=True)
     model.to(DEVICE)
