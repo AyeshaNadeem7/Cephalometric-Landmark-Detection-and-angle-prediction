@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.venv/
+venv/
+ENV/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Model/checkpoints (keep out of GitHub by default)
+*.pth
+*.pt
+*.ckpt
+
+# Data (usually large / external)
+**/Cephalograms/
+**/Annotations/

@@ -1,0 +1,5 @@
+gradio>=4,<5
+torch
+torchvision
+numpy
+Pillow
