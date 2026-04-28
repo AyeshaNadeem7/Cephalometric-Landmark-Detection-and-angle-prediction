@@ -1,5 +1,6 @@
 import os
 import json
+import inspect
 from typing import Dict, Tuple, Any
 
 import numpy as np
@@ -238,6 +239,13 @@ def predict_ui(pil_img: Image.Image):
         return f"ERROR: {type(e).__name__}: {e}", {"error": str(e)}
 
 
+_iface_params = set(inspect.signature(gr.Interface).parameters.keys())
+_interface_kwargs: Dict[str, Any] = {}
+if "flagging_mode" in _iface_params:
+    _interface_kwargs["flagging_mode"] = "never"
+elif "allow_flagging" in _iface_params:
+    _interface_kwargs["allow_flagging"] = "never"
+
 demo = gr.Interface(
     fn=predict_ui,
     inputs=gr.Image(type="pil", label="Upload X-ray"),
@@ -250,8 +258,8 @@ demo = gr.Interface(
         "Uploads a lateral cephalogram, predicts landmarks, then computes SNA/SNB/ANB and skeletal class. "
         "API is enabled (see the Space 'Use via API' section)."
     ),
-    allow_flagging="never",
     api_name="predict",
+    **_interface_kwargs,
 )
 
 
